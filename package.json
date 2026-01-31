@@ -9,9 +9,9 @@
   },
   "main": "out/main/index.js",
   "scripts": {
-    "dev": "electron-vite dev",
-    "build": "electron-vite build",
-    "preview": "electron-vite preview",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "package": "electron-builder --dir",
     "package:mac": "electron-builder --mac",
     "package:win": "electron-builder --win",
@@ -21,15 +21,14 @@
     "dist:upload": "node scripts/upload-release.mjs",
     "claude:download": "node scripts/download-claude-binary.mjs --version=2.1.25",
     "claude:download:all": "node scripts/download-claude-binary.mjs --version=2.1.25 --all",
-    "release": "rm -rf release && bun i && bun run claude:download && bun run build && bun run package:mac && bun run dist:manifest && ./scripts/upload-release-wrangler.sh",
-    "release:dev": "rm -rf release && bun run claude:download && bun run build && bun run package:mac && rm -rf node_modules && bun i",
+    "release": "rm -rf release && npm install && npm run claude:download && npm run build && npm run package:mac && npm run dist:manifest && ./scripts/upload-release-wrangler.sh",
     "sync:public": "./scripts/sync-to-public.sh",
     "icon:generate": "node scripts/generate-icon.mjs",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "ts:check": "tsgo --noEmit",
-    "postinstall": "node -e \"if(!process.env.VERCEL){require('child_process').execSync('electron-rebuild -f -w better-sqlite3,node-pty',{stdio:'inherit'})}\""
+    "ts:check": "tsc --noEmit",
+    "postinstall": "node -e \"if(!process.env.VERCEL && !process.env.NETLIFY){require('child_process').execSync('electron-rebuild -f -w better-sqlite3,node-pty',{stdio:'inherit'})}\""
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.14",
@@ -119,7 +118,6 @@
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",
-    "@welldone-software/why-did-you-render": "^10.0.1",
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.31.8",
     "electron": "33.4.5",
@@ -130,120 +128,5 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.4.5",
     "vite": "^6.3.4"
-  },
-  "build": {
-    "appId": "dev.21st.agents",
-    "productName": "1Code",
-    "npmRebuild": true,
-    "protocols": [
-      {
-        "name": "1Code",
-        "schemes": [
-          "twentyfirst-agents"
-        ]
-      }
-    ],
-    "directories": {
-      "buildResources": "build",
-      "output": "release"
-    },
-    "files": [
-      "out/**/*"
-    ],
-    "extraResources": [
-      {
-        "from": "drizzle",
-        "to": "migrations"
-      },
-      {
-        "from": "resources/bin/${platform}-${arch}",
-        "to": "bin",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "resources/bin/VERSION",
-        "to": "bin/VERSION"
-      }
-    ],
-    "asar": true,
-    "asarUnpack": [
-      "node_modules/better-sqlite3/**/*",
-      "node_modules/node-pty/**/*",
-      "node_modules/@anthropic-ai/claude-agent-sdk/**/*"
-    ],
-    "mac": {
-      "category": "public.app-category.developer-tools",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "arm64",
-            "x64"
-          ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "arm64",
-            "x64"
-          ]
-        }
-      ],
-      "icon": "build/icon.icns",
-      "hardenedRuntime": true,
-      "gatekeeperAssess": false,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist",
-      "extendInfo": {
-        "NSMicrophoneUsageDescription": "1Code needs microphone access for voice dictation"
-      }
-    },
-    "dmg": {
-      "window": {
-        "width": 540,
-        "height": 380
-      },
-      "contents": [
-        {
-          "x": 140,
-          "y": 150,
-          "type": "file"
-        },
-        {
-          "x": 400,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ],
-      "iconSize": 80
-    },
-    "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ],
-      "icon": "build/icon.ico"
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ],
-      "icon": "build/icons",
-      "category": "Development"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico"
-    },
-    "publish": {
-      "provider": "generic",
-      "url": "https://cdn.21st.dev/releases/desktop"
-    }
   }
 }
